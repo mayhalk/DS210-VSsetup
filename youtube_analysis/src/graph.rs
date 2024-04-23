@@ -1,18 +1,23 @@
 use std::collections::HashMap;
 
 pub struct Graph {
-    adj_list: HashMap<usize, Vec<usize>>,
+    adj_list: HashMap<u32, Vec<u32>>,
 }
 
 impl Graph {
     pub fn new() -> Self {
-        Graph {
+        Self {
             adj_list: HashMap::new(),
         }
     }
 
-    pub fn add_edge(&mut self, u: usize, v: usize) {
-        self.adj_list.entry(u).or_insert(Vec::new()).push(v);
-        self.adj_list.entry(v).or_insert(Vec::new()).push(u); //undirected graph
+    pub fn add_edge(&mut self, src: u32, dest: u32) {
+        self.adj_list.entry(src).or_insert(vec![]).push(dest);
+        self.adj_list.entry(dest).or_insert(vec![]).push(src); //undirected
+    }
+
+    pub fn get_neighbors(&self, vertex: &u32) -> Option<&Vec<u32>> {
+        self.adj_list.get(vertex)
     }
 }
+

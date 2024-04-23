@@ -1,7 +1,6 @@
 use crate::graph::Graph;
-use std::collections::{VecDeque, HashSet};
+use std::collections::{HashSet, VecDeque};
 
-//breadth-first search
 pub fn bfs(graph: &Graph, start_vertex: u32) -> HashSet<u32> {
     let mut visited = HashSet::new();
     let mut queue = VecDeque::new();
@@ -10,7 +9,7 @@ pub fn bfs(graph: &Graph, start_vertex: u32) -> HashSet<u32> {
     queue.push_back(start_vertex);
 
     while let Some(v) = queue.pop_front() {
-        if let Some(neighbors) = graph.adj_list.get(&v) {
+        if let Some(neighbors) = graph.get_neighbors(&v) {
             for &neighbor in neighbors {
                 if !visited.contains(&neighbor) {
                     visited.insert(neighbor);
@@ -19,6 +18,8 @@ pub fn bfs(graph: &Graph, start_vertex: u32) -> HashSet<u32> {
             }
         }
     }
+
     visited
 }
+
 
