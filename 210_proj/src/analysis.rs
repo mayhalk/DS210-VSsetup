@@ -1,5 +1,6 @@
 use crate::graph::Graph;
-use std::collections::{HashSet, VecDeque, HashMap};
+use std::collections::{HashMap, HashSet, VecDeque};
+use rand::prelude::*;
 
 //find neighbors of a node
 fn process_neighbors(node: u32, graph: &Graph, visited: &mut HashSet<u32>, queue: &mut VecDeque<u32>) {
@@ -34,14 +35,14 @@ pub fn bfs_shortest_paths(graph: &Graph, start: u32) -> HashMap<u32, u32> {
     queue.push_back(start);
 
     while let Some(node) = queue.pop_front() {
-        let current_distance = distances[&node];
+        let current_distance = *distances.get(&node).unwrap();
 
         if let Some(neighbors) = graph.get_neighbors(&node) {
             for &neighbor in neighbors {
-                distances.entry(neighbor).or_insert_with(|| {
+                if !distances.contains_key(&neighbor) {
                     queue.push_back(neighbor);
-                    current_distance + 1
-                });
+                    distances.insert(neighbor, current_distance + 1);
+                }
             }
         }
     }
@@ -50,13 +51,22 @@ pub fn bfs_shortest_paths(graph: &Graph, start: u32) -> HashMap<u32, u32> {
 }
 
 pub fn calculate_average_path_length(graph: &Graph) -> f64 {
-    let total_distance: u64 = graph.nodes().iter().map(|&node| {
-        bfs_shortest_paths(graph, node).values().map(|&d| u64::from(d)).sum::<u64>()
-    }).sum();
+    let mut rng = thread_rng();
+    let nodes: Vec<u32> = graph.nodes().into_iter().collect();
+    let sampled_nodes = nodes.choose_multiple(&mut rng, 1000).cloned().collect::<Vec<u32>>();
 
-    let paths_count: u64 = graph.nodes().iter().map(|&node| {
-        bfs_shortest_paths(graph, node).len() as u64
-    }).sum();
+    let mut total_distance: u64 = 0;
+    let mut paths_count: u64 = 0;
+
+    for &node in &sampled_nodes {
+        let shortest_paths = bfs_shortest_paths(graph, node);
+        for &target in &sampled_nodes {
+            if let Some(&distance) = shortest_paths.get(&target) {
+                total_distance += distance as u64;
+                paths_count += 1;
+            }
+        }
+    }
 
     if paths_count > 0 {
         total_distance as f64 / paths_count as f64
@@ -92,14 +102,3 @@ fn collect_component(graph: &Graph, start: u32, visited: &mut HashSet<u32>) -> V
 
     component
 }
-
-
-
-
-
-
-
-
-
-
-
