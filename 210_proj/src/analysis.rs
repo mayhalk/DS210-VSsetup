@@ -102,3 +102,51 @@ fn collect_component(graph: &Graph, start: u32, visited: &mut HashSet<u32>) -> V
 
     component
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::graph::Graph;
+
+    //simple graph for testing
+    fn create_test_graph() -> Graph {
+        let mut graph = Graph::new(); 
+        graph.add_edge(1, 2);
+        graph.add_edge(2, 3);
+        graph.add_edge(2, 4);
+        graph
+    }
+
+    #[test]
+    fn test_bfs() {
+        let graph = create_test_graph();
+        let result = bfs(&graph, 1);
+        assert_eq!(result.len(), 4, "BFS should visit all nodes");
+        assert!(result.contains(&1) && result.contains(&2) && result.contains(&3) && result.contains(&4), "BFS should visit all specific nodes");
+    }
+
+    #[test]
+    fn test_bfs_shortest_paths() {
+        let graph = create_test_graph();
+        let paths = bfs_shortest_paths(&graph, 1);
+        assert_eq!(paths.get(&2), Some(&1), "Shortest path to node 2 should be 1");
+        assert_eq!(paths.get(&3), Some(&2), "Shortest path to node 3 should be 2");
+        assert_eq!(paths.get(&4), Some(&2), "Shortest path to node 4 should be 2");
+    }
+
+    #[test]
+    fn test_calculate_average_path_length() {
+        let graph = create_test_graph();
+        let average_length = calculate_average_path_length(&graph);
+        assert!(average_length > 0.0, "Average path length should be greater than 0");
+    }
+
+    #[test]
+    fn test_find_connected_components() {
+        let graph = create_test_graph();
+        let components = find_connected_components(&graph);
+        assert_eq!(components.len(), 1, "There should be one connected component");
+        assert_eq!(components[0].len(), 4, "The component should include all nodes");
+    }
+}
+
